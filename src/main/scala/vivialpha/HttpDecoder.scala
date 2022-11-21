@@ -4,7 +4,7 @@ object HttpDecoder {
 
   def decode(request: String): Either[DecodeError, HttpRequest] = {
 
-    val lines: List[String] = request.split("\n").toList
+    val lines: List[String] = request.split("\r\n").toList
     val startLine = lines.head
     val startLines = startLine.split(" ")
     val (method, uri) = startLines match {
@@ -33,8 +33,13 @@ object HttpDecoder {
       val header: Header = Header(fieldName, fieldValue)
       header
     })
-    val body = bodyLines.tail.mkString
-    Right(HttpRequest(method, uri, headers, Body(body)))
+    val body = if (bodyLines.isEmpty) {
+      None
+    }
+    else {
+      Some(Body(bodyLines.tail.mkString))
+    }
+    Right(HttpRequest(method, uri, headers, body))
   }
 
   case class DecodeError()

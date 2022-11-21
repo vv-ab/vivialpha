@@ -12,13 +12,12 @@ class HttpDecoderSpec extends AnyFreeSpec {
     "should decode POST-Request" in {
 
       val request =
-        """|POST / HTTP/1.1
-           |Host: localhost:1234
-           |User-Agent: Mozilla/5.0
-           |Sec-Fetch-User: ?1
-           |
-           |expression=
-           |""".stripMargin
+        "POST / HTTP/1.1\r\n" +
+        "Host: localhost:1234\r\n" +
+        "User-Agent: Mozilla/5.0\r\n" +
+        "Sec-Fetch-User: ?1\r\n" +
+        "\r\n" +
+        "expression=\r\n"
       val expectation = Right(HttpRequest(
         Method.POST,
         URI("/"),
@@ -27,7 +26,7 @@ class HttpDecoderSpec extends AnyFreeSpec {
           Header("User-Agent", "Mozilla/5.0"),
           Header("Sec-Fetch-User", "?1")
         ),
-        Body("expression=")
+        Some(Body("expression="))
       ))
 
       assert(HttpDecoder.decode(request) == expectation)
@@ -40,17 +39,37 @@ class HttpDecoderSpec extends AnyFreeSpec {
       methodLiterals.zip(methods).foreach({ case (methodLiteral, method) =>
         s"$methodLiteral" in {
           val request =
-            s"""|$methodLiteral / HTTP/1.1
-                |Host: localhost:1234
-                |User-Agent: Mozilla/5.0
-                |Sec-Fetch-User: ?1
-                |
-                |expression=
-                |""".stripMargin
+            s"$methodLiteral / HTTP/1.1\r\n" +
+            "Host: localhost:1234\r\n" +
+            "User-Agent: Mozilla/5.0\r\n" +
+            "Sec-Fetch-User: ?1\r\n" +
+            "\r\n" +
+            "expression=\r\n"
 
           assert(HttpDecoder.decode(request).toOption.get.method == method)
         }
       })
+    }
+
+    "should decode a request without body" in {
+
+      val request =
+        "POST / HTTP/1.1\r\n" +
+        "Host: localhost:1234\r\n" +
+        "User-Agent: Mozilla/5.0\r\n" +
+        "Sec-Fetch-User: ?1\r\n"
+      val expectation = Right(HttpRequest(
+        Method.POST,
+        URI("/"),
+        List(
+          Header("Host", "localhost:1234"),
+          Header("User-Agent", "Mozilla/5.0"),
+          Header("Sec-Fetch-User", "?1")
+        ),
+        None
+      ))
+
+      assert(HttpDecoder.decode(request) == expectation)
     }
 
 

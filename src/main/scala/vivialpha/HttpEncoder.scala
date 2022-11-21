@@ -7,10 +7,10 @@ object HttpEncoder {
     val responseLine = s"HTTP/1.1 ${response.status.code} ${response.status.reason}"
     val headerLines = response.headers
       .map({ header => s"${header.fieldName}: ${header.fieldValue}"})
-      .mkString("\n")
+      .mkString("\r\n")
     val body = s"${response.body.content}"
 
-    Right(responseLine + "\n" + headerLines + "\n\n" + body)
+    Right(responseLine + "\r\n" + headerLines + "\r\n\r\n" + body)
   }
 
 
