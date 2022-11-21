@@ -17,7 +17,7 @@ class HttpDecoderSpec extends AnyFreeSpec {
         "User-Agent: Mozilla/5.0\r\n" +
         "Sec-Fetch-User: ?1\r\n" +
         "\r\n" +
-        "expression=\r\n"
+        "expression="
       val expectation = Right(HttpRequest(
         Method.POST,
         URI("/"),
@@ -44,7 +44,7 @@ class HttpDecoderSpec extends AnyFreeSpec {
             "User-Agent: Mozilla/5.0\r\n" +
             "Sec-Fetch-User: ?1\r\n" +
             "\r\n" +
-            "expression=\r\n"
+            "expression="
 
           assert(HttpDecoder.decode(request).toOption.get.method == method)
         }
