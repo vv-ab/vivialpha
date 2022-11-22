@@ -24,6 +24,8 @@ object HttpDecoder {
         (Method.PUT, URI(uri))
       case Array("CONNECT", uri, _) =>
         (Method.CONNECT, URI(uri))
+      case unknown =>
+        println(s"Failed to pase http method: $unknown")
     }
     val (headerLines, bodyLines) = lines.tail.span({ line => line != "" })
     val headers = headerLines.map({ line =>

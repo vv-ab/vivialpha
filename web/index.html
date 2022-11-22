@@ -1,15 +1,11 @@
 <html>
     <head>
         <style>
-            button {
-                background-color: #DAF7A6;
-                color: #84D2C4;
-                padding: 10px 10px 10px 10px;
-                border-radius: 12px;
-                width: 100px;
-                height: 100px;
-            }
             #abc {
+                width: 200px;
+                height: 45px;
+            }
+            #cba {
                 width: 200px;
                 height: 45px;
             }
@@ -19,13 +15,19 @@
         <h1>vivialpha</h1>
         <p><b>hello</b> world</p>
 
-        <form action="/hello" method="post">
+        <form action="/hello", method="post">
             <div>
                 <label for="abc"><p>Expression:</p></label>
                 <input id="abc" type="text" name="expression" placeholder="enter your expression here">
             </div>
             <input type="submit" value="ok">
         </form>
+
         <a href="here.html">here</a>
+        <a href="jokes.html"><p>to the jokes</p></a>
+
+        <form action="/history" method="post">
+            <input type="submit" value="show History">
+        </form>
     </body>
 </html>
