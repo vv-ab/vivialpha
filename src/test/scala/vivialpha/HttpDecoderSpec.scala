@@ -46,7 +46,7 @@ class HttpDecoderSpec extends AnyFreeSpec {
             "\r\n" +
             "expression="
 
-          assert(HttpDecoder.decode(request).toOption.get.method == method)
+          assert(HttpDecoder.decode(request).map(_.method) == Right(method))
         }
       })
     }

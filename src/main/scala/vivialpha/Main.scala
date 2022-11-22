@@ -1,9 +1,11 @@
 package vivialpha
 
+import java.io.File
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
 import java.nio.channels.{SelectionKey, Selector, ServerSocketChannel, SocketChannel}
 import java.nio.charset.StandardCharsets
+import scala.io.Source
 import scala.jdk.CollectionConverters.*
 
 case class HttpRequest(method: Method, uri: URI, headers: List[Header], body: Option[Body])
@@ -59,24 +61,41 @@ def register(selector: Selector, serverSocket: ServerSocketChannel): Unit = {
 
 def handle(buffer: ByteBuffer, key: SelectionKey): Unit = {
   val client = key.channel().asInstanceOf[SocketChannel]
+  buffer.clear()
   client.read(buffer)
   buffer.flip()
-  val request = String(buffer.array(), StandardCharsets.UTF_8).trim
+  val request = String(buffer.array(), 0, buffer.limit(), StandardCharsets.UTF_8).trim
   buffer.clear()
   HttpDecoder.decode(request) match {
     case Right(httpRequest) =>
-      println(s"received request: $httpRequest")
-      val httpResponse = HttpResponse(HttpStatus(200, "OK"), List.empty, Body("Hello World"))
-      HttpEncoder.encode(httpResponse) match {
+      println(request)
+      val response = httpRequest.uri.value match {
+        case "/vivi" =>
+          HttpResponse(HttpStatus(200, "OK"), List.empty, Body("<h1>Hey I'm Vivi</h1>"))
+        case "/hello" =>
+          val content = httpRequest.body.get.content
+          val responseContent = content.substring(content.indexOf("=") + 1)
+          HttpResponse(HttpStatus(200, "OK"), List.empty, Body(s"<h1>Hello $responseContent</h1>"))
+        case _ =>
+          val webRootDirectory = new File("web/")
+          val sourceFile = new File(webRootDirectory, httpRequest.uri.value)
+          if (sourceFile.exists() && sourceFile.isFile) {
+            val source = Source.fromFile(sourceFile)
+            val responseBody = source.mkString
+            HttpResponse(HttpStatus(200, "OK"), List.empty, Body(responseBody))
+          }
+          else {
+            HttpResponse(HttpStatus(404, "Not Found"), List.empty, Body(s"File not found: ${sourceFile.getPath}"))
+          }
+      }
+      HttpEncoder.encode(response) match {
         case Left(value) => ???
-        case Right(response) =>
-          println(s"sending response: $response")
-          buffer.put(response.getBytes(StandardCharsets.UTF_8))
+        case Right(httpResponse) =>
+          buffer.put(httpResponse.getBytes(StandardCharsets.UTF_8))
           buffer.flip()
           client.write(buffer)
       }
     case Left(value) => ???
   }
-  buffer.clear()
   client.close()
 }
