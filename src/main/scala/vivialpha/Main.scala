@@ -1,5 +1,8 @@
 package vivialpha
 
+import compilersandbox.tokenizer.{Tokenizer, Preprocessor}
+import compilersandbox.parser.{Node, Operand, Operator, Parser}
+import compilersandbox.makeErrorMessage
 import java.io.{File, FileWriter}
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
@@ -27,6 +30,7 @@ case class URI(value: String)
 
 @main
 def server(port: Int): Unit = {
+
 
   val selector = Selector.open()
 
@@ -82,12 +86,30 @@ def handle(buffer: ByteBuffer, key: SelectionKey): Unit = {
           val fileContent = content.split("=")
 
           val source = Source.fromFile("history.txt")
-          val newFileContent = s"${fileContent(1)}\n" + source.mkString
-          Files.write(Paths.get("history.txt"), newFileContent.getBytes(StandardCharsets.UTF_8))
-          source.close()
+          val responseContent = fileContent(1)
 
-          val responseContent = content.substring(content.indexOf("=") + 1)
-          HttpResponse(HttpStatus(200, "OK"), List.empty, Body(s"<div><h1>Hello $responseContent</h1><a href='index.html'>return</a></div>"))
+
+          val tokens = Tokenizer.tokenize(responseContent)
+          tokens match {
+            case Left(failure) =>
+              HttpResponse(HttpStatus(500, "Failure"), List.empty, Body(s"<div>Failure<a href='index.html'>return</a></div>"))
+            case Right(tokens) =>
+              val preprocessedTokens = Preprocessor.preprocess(tokens, List.empty)
+              val tree = Parser.parse(preprocessedTokens)
+              tree match {
+                case Left(failure) =>
+                  HttpResponse(HttpStatus(500, "Failure"), List.empty, Body(s"<div><p>Failure</p><a href='index.html'>return</a></div>"))
+                case Right(tree) =>
+                  val result = tree.compute()
+
+                  val newFileContent = s"$responseContent=$result\n" + source.mkString
+                  Files.write(Paths.get("history.txt"), newFileContent.getBytes(StandardCharsets.UTF_8))
+                  source.close()
+
+                  HttpResponse(HttpStatus(200, "OK"), List.empty, Body(s"<div><h1>${fileContent(1)}=$result</h1><a href='index.html'>return</a></div>"))
+
+              }
+          }
         case "/history" =>
           val source = Source.fromFile("history.txt")
           val fileContent = source.getLines().toList
@@ -121,7 +143,8 @@ def handle(buffer: ByteBuffer, key: SelectionKey): Unit = {
           buffer.flip()
           client.write(buffer)
       }
-    case Left(value) => ???
+    case Left(error) =>
+      println(s"DecodeError: ${error.message}")
   }
   client.close()
 }

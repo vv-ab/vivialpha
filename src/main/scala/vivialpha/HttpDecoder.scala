@@ -7,25 +7,25 @@ object HttpDecoder {
     val lines: List[String] = request.split("\r\n").toList
     val startLine = lines.head
     val startLines = startLine.split(" ")
-    val (method, uri) = startLines match {
+    val methodAndUri = startLines match {
       case Array("POST", uri, _) =>
-        (Method.POST, URI(uri))
+        Right((Method.POST, URI(uri)))
       case Array("GET", uri, _) =>
-        (Method.GET, URI(uri))
+        Right((Method.GET, URI(uri)))
       case Array("OPTIONS", uri, _) =>
-        (Method.OPTIONS, URI(uri))
+        Right((Method.OPTIONS, URI(uri)))
       case Array("HEAD", uri, _) =>
-        (Method.HEAD, URI(uri))
+        Right((Method.HEAD, URI(uri)))
       case Array("DELETE", uri, _) =>
-        (Method.DELETE, URI(uri))
+        Right((Method.DELETE, URI(uri)))
       case Array("TRACE", uri, _) =>
-        (Method.TRACE, URI(uri))
+        Right((Method.TRACE, URI(uri)))
       case Array("PUT", uri, _) =>
-        (Method.PUT, URI(uri))
+        Right((Method.PUT, URI(uri)))
       case Array("CONNECT", uri, _) =>
-        (Method.CONNECT, URI(uri))
+        Right((Method.CONNECT, URI(uri)))
       case unknown =>
-        println(s"Failed to pase http method: $unknown")
+        Left(DecodeError(s"Failed to parse http method: ${unknown.mkString}"))
     }
     val (headerLines, bodyLines) = lines.tail.span({ line => line != "" })
     val headers = headerLines.map({ line =>
@@ -41,8 +41,10 @@ object HttpDecoder {
     else {
       Some(Body(bodyLines.tail.mkString))
     }
-    Right(HttpRequest(method, uri, headers, body))
+    methodAndUri.map({ case (method, uri) =>
+      HttpRequest(method, uri, headers, body)
+    })
   }
 
-  case class DecodeError()
+  case class DecodeError(message: String)
 }
