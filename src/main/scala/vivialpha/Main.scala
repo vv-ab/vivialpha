@@ -26,12 +26,12 @@ case class Body(content: String)
 case class URI(value: String)
 
 @main
-def server(): Unit = {
+def server(port: Int): Unit = {
 
   val selector = Selector.open()
 
   val serverSocket = ServerSocketChannel.open()
-  serverSocket.bind(InetSocketAddress("0.0.0.0", 1234))
+  serverSocket.bind(InetSocketAddress("0.0.0.0", port))
   serverSocket.configureBlocking(false)
   serverSocket.register(selector, SelectionKey.OP_ACCEPT)
 
@@ -87,7 +87,7 @@ def handle(buffer: ByteBuffer, key: SelectionKey): Unit = {
           source.close()
 
           val responseContent = content.substring(content.indexOf("=") + 1)
-          HttpResponse(HttpStatus(200, "OK"), List.empty, Body(s"<h1>Hello $responseContent</h1>"))
+          HttpResponse(HttpStatus(200, "OK"), List.empty, Body(s"<div><h1>Hello $responseContent</h1><a href='index.html'>return</a></div>"))
         case "/history" =>
           val source = Source.fromFile("history.txt")
           val fileContent = source.getLines().toList
