@@ -16,5 +16,5 @@ object HttpEncoder {
   }
 
 
-  case class EncoderError()
+  case class EncoderError(message: String)
 }

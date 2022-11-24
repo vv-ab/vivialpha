@@ -60,24 +60,23 @@ def handle(buffer: ByteBuffer, key: SelectionKey): Unit = {
       println(request)
       val response = httpRequest.uri.value match {
         case "/jokes.html/1" =>
-          HttpPath.handleJokes1(httpRequest)
+          HttpRoutes.handleJokes1(httpRequest)
         case "/jokes.html/2" =>
-          HttpPath.handleJokes2(httpRequest)
+          HttpRoutes.handleJokes2(httpRequest)
         case "/vivi" =>
-          HttpPath.handleVivi(httpRequest)
+          HttpRoutes.handleVivi(httpRequest)
         case "/hello" =>
-          HttpPath.handleHello(httpRequest)
-
-         
+          HttpRoutes.handleHello(httpRequest)
         case "/history" =>
-          HttpPath.handleHistory(httpRequest)
+          HttpRoutes.handleHistory(httpRequest)
         case "/clear" =>
-          HttpPath.handleClear(httpRequest)
+          HttpRoutes.handleClear(httpRequest)
         case _ =>
-          HttpPath.handleStaticContent(httpRequest)
+          HttpRoutes.handleStaticContent(httpRequest)
       }
       HttpEncoder.encode(response) match {
-        case Left(value) => ???
+        case Left(error) =>
+          println(s"EncodeError: ${error.message}")
         case Right(httpResponse) =>
           buffer.put(httpResponse.getBytes(StandardCharsets.UTF_8))
           buffer.flip()

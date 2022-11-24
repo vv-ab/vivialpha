@@ -4,12 +4,14 @@ import java.nio.charset.StandardCharsets
 import java.io.{File, FileWriter}
 import java.nio.file.{Files, Paths}
 import scala.io.Source
-import vivialpha.model.Http.*
+import vivialpha.model.Http._
 import compilersandbox.tokenizer.{Preprocessor, Tokenizer}
 import compilersandbox.parser.{Node, Operand, Operator, Parser}
 import compilersandbox.makeErrorMessage
 
-object HttpPath {
+import scala.util.Left
+
+object HttpRoutes {
 
   def handleJokes1(httpRequest: HttpRequest): HttpResponse = {
 
@@ -33,33 +35,39 @@ object HttpPath {
     // replace("", pageContent)
     // HttpResponse(pageContent)
 
+
     val content = httpRequest.body.get.content
     val fileContent = content.split("=")
-
     val source = Source.fromFile("history.txt")
-    val responseContent = fileContent(1)
 
-
-    val tokens = Tokenizer.tokenize(responseContent)
-    tokens match {
-      case Left(failure) =>
-        HttpResponse(HttpStatus(500, "Failure"), List.empty, Body(s"<div style='font-family: Arial;'>Failure<a href='index.html'>return</a></div>"))
-      case Right(tokens) =>
-        val preprocessedTokens = Preprocessor.preprocess(tokens, List.empty)
-        val tree = Parser.parse(preprocessedTokens)
-        tree match {
-          case Left(failure) =>
-            HttpResponse(HttpStatus(500, "Failure"), List.empty, Body(s"<div style='font-family: Arial;'><p>Failure</p><a href='index.html'>return</a></div>"))
-          case Right(tree) =>
-            val result = tree.compute()
-
-            val newFileContent = s"$responseContent=$result\n" + source.mkString
-            Files.write(Paths.get("history.txt"), newFileContent.getBytes(StandardCharsets.UTF_8))
-            source.close()
-
-            HttpResponse(HttpStatus(200, "OK"), List.empty, Body(s"<div style='font-family: Arial;'><h1>${fileContent(1)}=$result</h1><a href='index.html'>return</a></div>"))
-        }
+    if (fileContent.length < 2) {
+      HttpResponse(HttpStatus(400, "Bad Request"), List.empty, Body(s"<div style='font-family: Arial;'><p>Failure</p><a href='index.html'>return</a></div>"))
     }
+    else {
+      val responseContent = fileContent(1)
+
+      val tokens = Tokenizer.tokenize(responseContent)
+      tokens match {
+        case Left(failure) =>
+          HttpResponse(HttpStatus(500, "Failure"), List.empty, Body(s"<div style='font-family: Arial;'>Failure<a href='index.html'>return</a></div>"))
+        case Right(tokens) =>
+          val preprocessedTokens = Preprocessor.preprocess(tokens, List.empty)
+          val tree = Parser.parse(preprocessedTokens)
+          tree match {
+            case Left(failure) =>
+              HttpResponse(HttpStatus(500, "Failure"), List.empty, Body(s"<div style='font-family: Arial;'><p>Failure</p><a href='index.html'>return</a></div>"))
+            case Right(tree) =>
+              val result = tree.compute()
+
+              val newFileContent = s"$responseContent=$result\n" + source.mkString
+              Files.write(Paths.get("history.txt"), newFileContent.getBytes(StandardCharsets.UTF_8))
+              source.close()
+
+              HttpResponse(HttpStatus(200, "OK"), List.empty, Body(s"<div style='font-family: Arial;'><h1>${fileContent(1)}=$result</h1><a href='index.html'>return</a></div>"))
+          }
+      }
+    }
+
   }
 
   def handleHistory(httpRequest: HttpRequest): HttpResponse = {
