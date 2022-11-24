@@ -3,6 +3,7 @@ package vivialpha
 import org.junit.runner.RunWith
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatestplus.junit.JUnitRunner
+import vivialpha.model.Http.*
 
 @RunWith(classOf[JUnitRunner])
 class HttpDecoderSpec extends AnyFreeSpec {

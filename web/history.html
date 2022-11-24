@@ -1,21 +1,42 @@
 <html>
     <head>
         <style>
-            input {
-            }
-
+           html {
+                border: 5px solid;
+           }
+           * {
+               font-family: Arial;
+               border-radius: 5px;
+           }
+           a {
+               color: #000000;
+           }
+           span {
+               background-color: #427FEF;
+               padding: 5px 7px;
+           }
+           .button {
+               background-color: #427FEF;
+               border: none;
+               opacity: 0.7;
+               padding: 5px 13px;
+               margin: 4px;
+               font-weight: bold;
+               rad
+           }
+           .button:hover {opacity: 1}
         </style>
     </head>
     <body>
-        <h4>History</h4>
-        <button type="button"><a href=index.html>return</a></button>
+        <h3><u>History</u></h3>
+        <button class="button" type="button"><a href=index.html>return</a></button>
 
         <div>
             {{history}}
         </div>
 
         <form action="/clear" method="post">
-            <input type="submit" value="clear History">
+            <input class="button" type="submit" value="clear History">
         </form>
     </body>
 </html>

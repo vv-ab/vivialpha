@@ -1,5 +1,7 @@
 package vivialpha
 
+import vivialpha.model.Http.{HttpRequest, Method, URI, Header, Body}
+
 object HttpDecoder {
 
   def decode(request: String): Either[DecodeError, HttpRequest] = {

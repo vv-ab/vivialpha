@@ -1,8 +1,5 @@
 package vivialpha
 
-import compilersandbox.tokenizer.{Tokenizer, Preprocessor}
-import compilersandbox.parser.{Node, Operand, Operator, Parser}
-import compilersandbox.makeErrorMessage
 import java.io.{File, FileWriter}
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
@@ -11,26 +8,13 @@ import java.nio.charset.StandardCharsets
 import java.nio.file.{Files, Paths}
 import scala.io.Source
 import scala.jdk.CollectionConverters.*
-
-case class HttpRequest(method: Method, uri: URI, headers: List[Header], body: Option[Body])
-
-case class HttpResponse(status: HttpStatus, headers: List[Header], body: Body)
-
-case class HttpStatus(code: Int, reason: String)
-
-enum Method {
-  case OPTIONS, GET, HEAD, POST, PUT, DELETE, TRACE, CONNECT
-}
-
-case class Header(fieldName: String, fieldValue: String)
-
-case class Body(content: String)
-
-case class URI(value: String)
+import compilersandbox.tokenizer.{Preprocessor, Tokenizer}
+import compilersandbox.parser.{Node, Operand, Operator, Parser}
+import compilersandbox.makeErrorMessage
+import vivialpha.model.Http._
 
 @main
 def server(port: Int): Unit = {
-
 
   val selector = Selector.open()
 
@@ -76,65 +60,21 @@ def handle(buffer: ByteBuffer, key: SelectionKey): Unit = {
       println(request)
       val response = httpRequest.uri.value match {
         case "/jokes.html/1" =>
-          HttpResponse(HttpStatus(200, "OK"), List.empty, Body("<h3>What is the name of penguin's fav aunt? ...Aunt Arctica</h3>"))
+          HttpPath.handleJokes1(httpRequest)
         case "/jokes.html/2" =>
-          HttpResponse(HttpStatus(200, "OK"), List.empty, Body("<h3>What did one ocean say to the other? Nothing, they just waved.</h3>"))
+          HttpPath.handleJokes2(httpRequest)
         case "/vivi" =>
-          HttpResponse(HttpStatus(200, "OK"), List.empty, Body("<h1>Hey I'm Vivi</h1>"))
+          HttpPath.handleVivi(httpRequest)
         case "/hello" =>
-          val content = httpRequest.body.get.content
-          val fileContent = content.split("=")
+          HttpPath.handleHello(httpRequest)
 
-          val source = Source.fromFile("history.txt")
-          val responseContent = fileContent(1)
-
-
-          val tokens = Tokenizer.tokenize(responseContent)
-          tokens match {
-            case Left(failure) =>
-              HttpResponse(HttpStatus(500, "Failure"), List.empty, Body(s"<div>Failure<a href='index.html'>return</a></div>"))
-            case Right(tokens) =>
-              val preprocessedTokens = Preprocessor.preprocess(tokens, List.empty)
-              val tree = Parser.parse(preprocessedTokens)
-              tree match {
-                case Left(failure) =>
-                  HttpResponse(HttpStatus(500, "Failure"), List.empty, Body(s"<div><p>Failure</p><a href='index.html'>return</a></div>"))
-                case Right(tree) =>
-                  val result = tree.compute()
-
-                  val newFileContent = s"$responseContent=$result\n" + source.mkString
-                  Files.write(Paths.get("history.txt"), newFileContent.getBytes(StandardCharsets.UTF_8))
-                  source.close()
-
-                  HttpResponse(HttpStatus(200, "OK"), List.empty, Body(s"<div><h1>${fileContent(1)}=$result</h1><a href='index.html'>return</a></div>"))
-
-              }
-          }
+         
         case "/history" =>
-          val source = Source.fromFile("history.txt")
-          val fileContent = source.getLines().toList
-            .map({ line => s"<p style='color: red;'>$line</p>" })
-            .mkString("\n")
-          source.close()
-
-          val template = Source.fromFile("web/history.html")
-          val responseBody = template.mkString.replace("{{history}}",fileContent)
-
-          HttpResponse(HttpStatus(200, "OK"), List.empty, Body(responseBody))
+          HttpPath.handleHistory(httpRequest)
         case "/clear" =>
-          Files.write(Paths.get("history.txt"), "".getBytes(StandardCharsets.UTF_8))
-          HttpResponse(HttpStatus(200, "OK"), List.empty, Body("<div><p>cleared history</p><a href='index.html'>return</a></div>"))
+          HttpPath.handleClear(httpRequest)
         case _ =>
-          val webRootDirectory = new File("web/")
-          val sourceFile = new File(webRootDirectory, httpRequest.uri.value)
-          if (sourceFile.exists() && sourceFile.isFile) {
-            val source = Source.fromFile(sourceFile)
-            val responseBody = source.mkString
-            HttpResponse(HttpStatus(200, "OK"), List.empty, Body(responseBody))
-          }
-          else {
-            HttpResponse(HttpStatus(404, "Not Found"), List.empty, Body(s"File not found: ${sourceFile.getPath}"))
-          }
+          HttpPath.handleStaticContent(httpRequest)
       }
       HttpEncoder.encode(response) match {
         case Left(value) => ???

@@ -1,5 +1,7 @@
 package vivialpha
 
+import vivialpha.model.Http.*
+
 object HttpEncoder {
 
   def encode(response: HttpResponse): Either[EncoderError, String] = {
