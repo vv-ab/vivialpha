@@ -59,14 +59,8 @@ def handle(buffer: ByteBuffer, key: SelectionKey): Unit = {
     case Right(httpRequest) =>
       println(request)
       val response = httpRequest.uri.value match {
-        case "/jokes.html/1" =>
-          HttpRoutes.handleJokes1(httpRequest)
-        case "/jokes.html/2" =>
-          HttpRoutes.handleJokes2(httpRequest)
-        case "/vivi" =>
-          HttpRoutes.handleVivi(httpRequest)
-        case "/hello" =>
-          HttpRoutes.handleHello(httpRequest)
+        case "/result" =>
+          HttpRoutes.handleResult(httpRequest)
         case "/history" =>
           HttpRoutes.handleHistory(httpRequest)
         case "/clear" =>

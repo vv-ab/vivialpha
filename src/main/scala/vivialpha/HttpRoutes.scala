@@ -13,22 +13,7 @@ import scala.util.Left
 
 object HttpRoutes {
 
-  def handleJokes1(httpRequest: HttpRequest): HttpResponse = {
-
-    HttpResponse(HttpStatus(200, "OK"), List.empty, Body("<h3 style='font-family: Arial; .center-screen:display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;'>What is the name of penguin's fav aunt? ...Aunt Arctica</h3>"))
-  }
-
-  def handleJokes2(httpRequest: HttpRequest): HttpResponse = {
-
-    HttpResponse(HttpStatus(200, "OK"), List.empty, Body("<h3 style='font-family: Arial; .center-screen:display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;'>What did one ocean say to the other? Nothing, they just waved.</h3>"))
-  }
-
-  def handleVivi(httpRequest: HttpRequest): HttpResponse = {
-
-    HttpResponse(HttpStatus(200, "OK"), List.empty, Body("<h1 style='font-family: Arial;'>Hey I'm Vivi</h1>"))
-  }
-
-  def handleHello(httpRequest: HttpRequest): HttpResponse = {
+  def handleResult(httpRequest: HttpRequest): HttpResponse = {
 
     // goToPath(???)
     // val pageContent = ???
