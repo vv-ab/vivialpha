@@ -8,6 +8,7 @@ import vivialpha.model.Http._
 import compilersandbox.tokenizer.{Preprocessor, Tokenizer}
 import compilersandbox.parser.{Node, Operand, Operator, Parser}
 import compilersandbox.makeErrorMessage
+import vivialpha.Template.loadTemplate
 
 import scala.util.Left
 
@@ -15,18 +16,12 @@ object HttpRoutes {
 
   def handleResult(httpRequest: HttpRequest): HttpResponse = {
 
-    // goToPath(???)
-    // val pageContent = ???
-    // replace("", pageContent)
-    // HttpResponse(pageContent)
-
-
     val content = httpRequest.body.get.content
     val fileContent = content.split("=")
     val source = Source.fromFile("history.txt")
 
     if (fileContent.length < 2) {
-      HttpResponse(HttpStatus(400, "Bad Request"), List.empty, Body(s"<div style='font-family: Arial;'><p>Failure</p><a href='index.html'>return</a></div>"))
+      badRequest("empty expression", "cannot compute value of empty expression")
     }
     else {
       val responseContent = fileContent(1)
@@ -34,13 +29,13 @@ object HttpRoutes {
       val tokens = Tokenizer.tokenize(responseContent)
       tokens match {
         case Left(failure) =>
-          HttpResponse(HttpStatus(500, "Failure"), List.empty, Body(s"<div style='font-family: Arial;'>Failure<a href='index.html'>return</a></div>"))
+          badRequest("tokenizer failure", failure.message)
         case Right(tokens) =>
           val preprocessedTokens = Preprocessor.preprocess(tokens, List.empty)
           val tree = Parser.parse(preprocessedTokens)
           tree match {
             case Left(failure) =>
-              HttpResponse(HttpStatus(500, "Failure"), List.empty, Body(s"<div style='font-family: Arial;'><p>Failure</p><a href='index.html'>return</a></div>"))
+              badRequest("parsing failure", failure.message)
             case Right(tree) =>
               val result = tree.compute()
 
@@ -48,11 +43,18 @@ object HttpRoutes {
               Files.write(Paths.get("history.txt"), newFileContent.getBytes(StandardCharsets.UTF_8))
               source.close()
 
-              HttpResponse(HttpStatus(200, "OK"), List.empty, Body(s"<div style='font-family: Arial;'><h1>${fileContent(1)}=$result</h1><a href='index.html'>return</a></div>"))
+              val templateResult = loadTemplate("web/result.html", Map(
+                "result" -> s"$responseContent=$result\n"
+              ))
+              templateResult match {
+                case Left(error) =>
+                  HttpResponse(HttpStatus(500, "Internal Server Error"), List.empty, Body(error.message))
+                case Right(content) =>
+                  HttpResponse(HttpStatus(200, "OK"), List.empty, Body(content))
+              }
           }
       }
     }
-
   }
 
   def handleHistory(httpRequest: HttpRequest): HttpResponse = {
@@ -63,16 +65,30 @@ object HttpRoutes {
       .mkString("\n")
     source.close()
 
-    val template = Source.fromFile("web/history.html")
-    val responseBody = template.mkString.replace("{{history}}", fileContent)
-
-    HttpResponse(HttpStatus(200, "OK"), List.empty, Body(responseBody))
+    val templateResult = loadTemplate("web/history.html", Map(
+      "history" -> fileContent
+    ))
+    templateResult match {
+      case Left(error) =>
+        HttpResponse(HttpStatus(500, "Internal Server Error"), List.empty, Body(error.message))
+      case Right(content) =>
+        HttpResponse(HttpStatus(200, "OK"), List.empty, Body(content))
+    }
   }
 
   def handleClear(httpRequest: HttpRequest): HttpResponse = {
 
     Files.write(Paths.get("history.txt"), "".getBytes(StandardCharsets.UTF_8))
-    HttpResponse(HttpStatus(200, "OK"), List.empty, Body("<div><p style='font-family:Arial;'>cleared history</p><a href='index.html'>return</a></div>"))
+
+    val templateResult = loadTemplate("web/result.html", Map(
+      "result" -> "cleared history"
+    ))
+    templateResult match {
+      case Left(error) =>
+        HttpResponse(HttpStatus(500, "Internal Server Error"), List.empty, Body(error.message))
+      case Right(content) =>
+        HttpResponse(HttpStatus(200, "OK"), List.empty, Body(content))
+    }
   }
 
   def handleStaticContent(httpRequest: HttpRequest): HttpResponse = {
@@ -85,13 +101,33 @@ object HttpRoutes {
       HttpResponse(HttpStatus(200, "OK"), List.empty, Body(responseBody))
     }
     else {
-      HttpResponse(HttpStatus(404, "Not Found"), List.empty, Body(s"<p style='font-family: Arial;'>File not found: ${sourceFile.getPath}</p>"))
+      notFound(sourceFile.getPath)
     }
   }
 
+  def badRequest(error: String, details: String): HttpResponse = {
+    val templateResult = loadTemplate("web/error.html", Map(
+      "error" -> error,
+      "details" -> details
+    ))
+    templateResult match {
+      case Left(error) =>
+        HttpResponse(HttpStatus(500, "Internal Server Error"), List.empty, Body(error.message))
+      case Right(content) =>
+        HttpResponse(HttpStatus(400, "Bad Request"), List.empty, Body(content))
+    }
+  }
 
-  def goToPath(): Unit = {
-    
-    ???
+  def notFound(filePath: String): HttpResponse = {
+    val templateResult = loadTemplate("web/error.html", Map(
+      "error" -> "File not found:",
+      "details" -> filePath
+    ))
+    templateResult match {
+      case Left(error) =>
+        HttpResponse(HttpStatus(500, "Internal Server Error"), List.empty, Body(error.message))
+      case Right(content) =>
+        HttpResponse(HttpStatus(404, "Not Found"), List.empty, Body(content))
+    }
   }
 }
