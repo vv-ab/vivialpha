@@ -16,7 +16,7 @@ object HttpRoutes {
 
   def handleResult(httpRequest: HttpRequest): HttpResponse = {
 
-    val content = httpRequest.body.get.content
+    val content = httpRequest.body.get.content // TODO: Handle empty body
     val fileContent = content.split("=")
     val source = Source.fromFile("history.txt")
 
@@ -43,8 +43,8 @@ object HttpRoutes {
               Files.write(Paths.get("history.txt"), newFileContent.getBytes(StandardCharsets.UTF_8))
               source.close()
 
-              val templateResult = loadTemplate("web/result.html", Map(
-                "result" -> s"$responseContent=$result\n"
+              val templateResult = loadTemplate("web/successful.html", Map(
+                "successful action" -> s"$responseContent=$result\n"
               ))
               templateResult match {
                 case Left(error) =>
@@ -80,8 +80,8 @@ object HttpRoutes {
 
     Files.write(Paths.get("history.txt"), "".getBytes(StandardCharsets.UTF_8))
 
-    val templateResult = loadTemplate("web/result.html", Map(
-      "result" -> "cleared history"
+    val templateResult = loadTemplate("web/successful.html", Map(
+      "successful action" -> "cleared history"
     ))
     templateResult match {
       case Left(error) =>

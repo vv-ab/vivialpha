@@ -34,6 +34,11 @@
                 height: 45px;
                 cursor: initial;
             }
+            #demo {
+                opacity: 50%;
+                padding: 4px 10px;
+                border: 2px solid;
+            }
         </style>
     </head>
     <body>
@@ -50,5 +55,23 @@
         <form action="/history" method="post">
             <input class="button" type="submit" value="show History">
         </form>
+
+        <button id="button" type="button" onclick="MyFunction()">Show result</button>
+        <p id="demo" >this will change</p>
+
+    <script>
+        function MyFunction() {
+            let expression = document.getElementById("expressionInput").value;
+            fetch("/result", {
+                method: 'POST',
+                body: `expression=${expression}`
+                })
+                .then((response) => response.text())
+                .then((text) => {
+                    document.getElementById("demo").innerText = text;
+                })
+        }
+    </script>
+    <noscript>Sorry, your browser cannot show result.</noscript>
     </body>
 </html>
