@@ -1,0 +1,5 @@
+#!/bin/bash
+
+./gradlew installDist
+
+sudo docker build -t vivialpha .

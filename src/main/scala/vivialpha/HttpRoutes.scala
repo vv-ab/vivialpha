@@ -18,7 +18,10 @@ object HttpRoutes {
 
     val content = httpRequest.body.get.content // TODO: Handle empty body
     val fileContent = content.split("=")
-    val source = Source.fromFile("history.txt")
+
+    val historyFile = new File("history.txt")
+    historyFile.createNewFile()
+    val source = Source.fromFile(historyFile)
 
     if (fileContent.length < 2) {
       badRequest("empty expression", "cannot compute value of empty expression")
@@ -58,8 +61,14 @@ object HttpRoutes {
   }
 
   def handleHistory(httpRequest: HttpRequest): HttpResponse = {
+    println("handling history...")
+    val historyFile = new File("history.txt")
+    println("1")
+    println(historyFile.createNewFile())
+    println("2")
+    val source = Source.fromFile(historyFile)
+    println("3")
 
-    val source = Source.fromFile("history.txt")
     val fileContent = source.getLines().toList
       .map({ line => s"<p style='color: red;'>$line</p>" })
       .mkString("\n")

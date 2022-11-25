@@ -9,6 +9,7 @@ buildscript {
 
 apply plugin: "scala"
 apply plugin: "bloop"
+apply plugin: "distribution"
 
 repositories {
     mavenCentral()
@@ -26,4 +27,24 @@ dependencies {
     implementation "vv-ab:compilersandbox:0.1.0"
     testImplementation "org.scalatest:scalatest_3:3.2.14"
     testImplementation "org.scalatestplus:junit-4-13_3:3.2.12.0"
+}
+
+jar {
+    manifest.attributes([
+        "Main-Class": 'vivialpha/App',
+        "Class-Path": configurations.runtimeClasspath.collect { "libs/" + it.getName() }.join(' ')
+    ])
+}
+
+distributions {
+    main {
+        contents {
+            from(jar.outputs) {
+                rename("${project.name}-${version}.jar", "${project.name}.jar")
+            }
+            from(configurations.runtimeClasspath) {
+                into "libs"
+            }
+        }
+    }
 }

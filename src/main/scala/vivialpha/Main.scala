@@ -13,29 +13,36 @@ import compilersandbox.parser.{Node, Operand, Operator, Parser}
 import compilersandbox.makeErrorMessage
 import vivialpha.model.Http._
 
-@main
-def server(port: Int): Unit = {
+object App {
 
-  val selector = Selector.open()
+  def main(args: Array[String]): Unit = {
+    server(args(0).toInt)
+  }
 
-  val serverSocket = ServerSocketChannel.open()
-  serverSocket.bind(InetSocketAddress("0.0.0.0", port))
-  serverSocket.configureBlocking(false)
-  serverSocket.register(selector, SelectionKey.OP_ACCEPT)
+  @main
+  def server(port: Int): Unit = {
 
-  val buffer = ByteBuffer.allocate(4096)
+    val selector = Selector.open()
 
-  while (true) {
-    selector.select()
-    val selectedKeys = selector.selectedKeys()
-    for (key <- selectedKeys.asScala) {
-      if (key.isAcceptable) {
-        register(selector, serverSocket)
+    val serverSocket = ServerSocketChannel.open()
+    serverSocket.bind(InetSocketAddress("0.0.0.0", port))
+    serverSocket.configureBlocking(false)
+    serverSocket.register(selector, SelectionKey.OP_ACCEPT)
+
+    val buffer = ByteBuffer.allocate(4096)
+
+    while (true) {
+      selector.select()
+      val selectedKeys = selector.selectedKeys()
+      for (key <- selectedKeys.asScala) {
+        if (key.isAcceptable) {
+          register(selector, serverSocket)
+        }
+        if (key.isReadable) {
+          handle(buffer, key)
+        }
+        selectedKeys.remove(key)
       }
-      if (key.isReadable) {
-        handle(buffer, key)
-      }
-      selectedKeys.remove(key)
     }
   }
 }
