@@ -16,6 +16,7 @@
             }
             span {
                 background-color: #427FEF;
+                opacity: 85%;
                 padding: 5px 7px;
             }
             .button {
@@ -28,14 +29,10 @@
                 rad
             }
             .button:hover {opacity: 1}
-            #abc {
+            #expressionInput {
                 width: 200px;
                 height: 45px;
                 cursor: initial;
-            }
-            #cba {
-                width: 200px;
-                height: 45px;
             }
         </style>
     </head>
@@ -44,8 +41,8 @@
 
         <form action="/result" method="post" enctype="text/plain">
             <div>
-                <label for="abc"><p>Expression:</p></label>
-                <input id="abc" type="text" name="expression" placeholder="enter your expression here">
+                <label for="expressionInput"><p>Expression:</p></label>
+                <input id="expressionInput" type="text" name="expression" placeholder="enter your expression here">
             </div>
             <input class="button" type="submit" value="ok">
         </form>
