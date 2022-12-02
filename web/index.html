@@ -34,6 +34,16 @@
                 height: 45px;
                 cursor: initial;
             }
+            #button {
+                background-color: #427FEF;
+                border: none;
+                opacity: 0.7;
+                padding: 5px 13px;
+                margin: 4px;
+                font-weight: bold;
+                rad
+            }
+            #button:hover {opacity: 1}
             #demo {
                 opacity: 50%;
                 padding: 4px 10px;
@@ -49,27 +59,24 @@
                 <label for="expressionInput"><p>Expression:</p></label>
                 <input id="expressionInput" type="text" name="expression" placeholder="enter your expression here">
             </div>
-            <input class="button" type="submit" value="ok">
+            <button id="button" type="button" onclick="MyFunction()">Show result</button>
+            <p id="demo" >result will show here</p>
         </form>
 
         <form action="/history" method="post">
             <input class="button" type="submit" value="show History">
         </form>
-
-        <button id="button" type="button" onclick="MyFunction()">Show result</button>
-        <p id="demo" >this will change</p>
-
     <script>
         function MyFunction() {
-            let expression = document.getElementById("expressionInput").value;
-            fetch("/result", {
-                method: 'POST',
-                body: `expression=${expression}`
-                })
-                .then((response) => response.text())
-                .then((text) => {
-                    document.getElementById("demo").innerText = text;
-                })
+        let expression = document.getElementById("expressionInput").value;
+        fetch("/result", {
+            method: 'POST',
+            body: `expression=${expression}`
+            })
+            .then((response) => response.text())
+            .then((text) => {
+                document.getElementById("demo").innerText = text.trim();
+            })
         }
     </script>
     <noscript>Sorry, your browser cannot show result.</noscript>

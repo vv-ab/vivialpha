@@ -24,7 +24,7 @@ object HttpRoutes {
     val source = Source.fromFile(historyFile)
 
     if (fileContent.length < 2) {
-      badRequest("empty expression", "cannot compute value of empty expression")
+      HttpResponse(HttpStatus(400, "Bad Request"), List.empty, Body("empty expression\ncannot compute value of empty expression"))
     }
     else {
       val responseContent = fileContent(1)
@@ -32,13 +32,13 @@ object HttpRoutes {
       val tokens = Tokenizer.tokenize(responseContent)
       tokens match {
         case Left(failure) =>
-          badRequest("tokenizer failure", failure.message)
+          HttpResponse(HttpStatus(400, "Bad Request"), List.empty, Body(s"tokenizer failure: ${failure.message}"))
         case Right(tokens) =>
           val preprocessedTokens = Preprocessor.preprocess(tokens, List.empty)
           val tree = Parser.parse(preprocessedTokens)
           tree match {
             case Left(failure) =>
-              badRequest("parsing failure", failure.message)
+              HttpResponse(HttpStatus(400, "Bad Request"), List.empty, Body(s"parsing failure: ${failure.message}"))
             case Right(tree) =>
               val result = tree.compute()
 
@@ -46,15 +46,7 @@ object HttpRoutes {
               Files.write(Paths.get("history.txt"), newFileContent.getBytes(StandardCharsets.UTF_8))
               source.close()
 
-              val templateResult = loadTemplate("web/successful.html", Map(
-                "successful action" -> s"$responseContent=$result\n"
-              ))
-              templateResult match {
-                case Left(error) =>
-                  HttpResponse(HttpStatus(500, "Internal Server Error"), List.empty, Body(error.message))
-                case Right(content) =>
-                  HttpResponse(HttpStatus(200, "OK"), List.empty, Body(content))
-              }
+              HttpResponse(HttpStatus(200, "OK"), List.empty, Body(s"$responseContent=$result\n"))
           }
       }
     }
@@ -63,11 +55,7 @@ object HttpRoutes {
   def handleHistory(httpRequest: HttpRequest): HttpResponse = {
     println("handling history...")
     val historyFile = new File("history.txt")
-    println("1")
-    println(historyFile.createNewFile())
-    println("2")
     val source = Source.fromFile(historyFile)
-    println("3")
 
     val fileContent = source.getLines().toList
       .map({ line => s"<p style='color: red;'>$line</p>" })
