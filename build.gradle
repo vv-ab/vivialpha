@@ -11,13 +11,21 @@ apply plugin: "scala"
 apply plugin: "bloop"
 apply plugin: "distribution"
 
+ext {
+    additionalCompileOptions = [
+        "-no-ident",
+        "-feature",
+        "-Ycheck-all-patmat",
+    ]
+}
+
 repositories {
     mavenCentral()
     maven {
         url = uri("https://maven.pkg.github.com/vv-ab/compilersandbox")
         credentials {
-            username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
-            password = project.findProperty("gpr.key") ?: System.getenv("TOKEN")
+            username = project.findProperty("gpr.user") ?: System.getenv("GBR_USER")
+            password = project.findProperty("gpr.key") ?: System.getenv("GBR_KEY")
         }
     }
 }
@@ -27,6 +35,14 @@ dependencies {
     implementation "vv-ab:compilersandbox:0.1.0"
     testImplementation "org.scalatest:scalatest_3:3.2.14"
     testImplementation "org.scalatestplus:junit-4-13_3:3.2.12.0"
+}
+
+compileScala {
+    scalaCompileOptions.additionalParameters = additionalCompileOptions
+}
+
+compileTestScala {
+    scalaCompileOptions.additionalParameters = additionalCompileOptions
 }
 
 jar {
