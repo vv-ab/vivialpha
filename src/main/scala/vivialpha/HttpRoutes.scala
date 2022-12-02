@@ -19,7 +19,7 @@ object HttpRoutes {
     val content = httpRequest.body.get.content // TODO: Handle empty body
     val fileContent = content.split("=")
 
-    val historyFile = new File("history.txt")
+    val historyFile = new File("data/history.txt")
     historyFile.createNewFile()
     val source = Source.fromFile(historyFile)
 
@@ -43,7 +43,7 @@ object HttpRoutes {
               val result = tree.compute()
 
               val newFileContent = s"$responseContent=$result\n" + source.mkString
-              Files.write(Paths.get("history.txt"), newFileContent.getBytes(StandardCharsets.UTF_8))
+              Files.write(Paths.get("data/history.txt"), newFileContent.getBytes(StandardCharsets.UTF_8))
               source.close()
 
               HttpResponse(HttpStatus(200, "OK"), List.empty, Body(s"$responseContent=$result\n"))
@@ -54,7 +54,8 @@ object HttpRoutes {
 
   def handleHistory(httpRequest: HttpRequest): HttpResponse = {
     println("handling history...")
-    val historyFile = new File("history.txt")
+    val historyFile = new File("data/history.txt")
+    historyFile.createNewFile()
     val source = Source.fromFile(historyFile)
 
     val fileContent = source.getLines().toList
@@ -75,7 +76,7 @@ object HttpRoutes {
 
   def handleClear(httpRequest: HttpRequest): HttpResponse = {
 
-    Files.write(Paths.get("history.txt"), "".getBytes(StandardCharsets.UTF_8))
+    Files.write(Paths.get("data/history.txt"), "".getBytes(StandardCharsets.UTF_8))
 
     val templateResult = loadTemplate("web/successful.html", Map(
       "successful action" -> "cleared history"

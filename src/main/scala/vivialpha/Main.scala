@@ -68,8 +68,8 @@ def handle(buffer: ByteBuffer, key: SelectionKey): Unit = {
       val response = httpRequest.uri.value match {
         case "/result" =>
           HttpRoutes.handleResult(httpRequest)
-        case "/history" =>
-          HttpRoutes.handleHistory(httpRequest)
+        // case "/history" =>
+          // HttpRoutes.handleHistory(httpRequest)
         case "/clear" =>
           HttpRoutes.handleClear(httpRequest)
         case _ =>
