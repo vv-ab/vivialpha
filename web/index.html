@@ -46,37 +46,38 @@
             #button:hover {opacity: 1}
             #demo {
                 opacity: 50%;
-                padding: 4px 10px;
+                padding: 10px 4px;
                 border: 2px solid;
+                margin: 2px;
             }
         </style>
     </head>
     <body>
         <h1><u><span>vivialpha</span></u></h1>
 
-        <form action="/result" method="post" enctype="text/plain">
+        <div>
             <div>
                 <label for="expressionInput"><p>Expression:</p></label>
                 <input id="expressionInput" type="text" name="expression" placeholder="enter your expression here">
             </div>
-            <button id="button" type="button" onclick="MyFunction()">Show result</button>
+            <button id="button" type="button" onclick="showResult()">Show result</button>
             <p id="demo" >result will show here</p>
-        </form>
+        </div>
 
-        <form action="/history" method="post">
-            <input class="button" type="submit" value="show History">
-        </form>
+        <div>
+            <button class="button" onclick="window.location.href='/history';">History</button>
+        </div>
     <script>
-        function MyFunction() {
-        let expression = document.getElementById("expressionInput").value;
-        fetch("/result", {
-            method: 'POST',
-            body: `expression=${expression}`
-            })
-            .then((response) => response.text())
-            .then((text) => {
-                document.getElementById("demo").innerText = text.trim();
-            })
+        function showResult() {
+            let expression = document.getElementById("expressionInput").value;
+            fetch("/result", {
+                method: 'POST',
+                body: `expression=${expression}`
+                })
+                .then((response) => response.text())
+                .then((text) => {
+                    document.getElementById("demo").innerText = text.trim();
+                })
         }
     </script>
     <noscript>Sorry, your browser cannot show result.</noscript>

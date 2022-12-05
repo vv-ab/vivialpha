@@ -31,14 +31,14 @@
     </head>
     <body>
         <h3><u>History</u></h3>
-        <button class="button" type="button"><a href="/index.html">return</a></button>
+        <button class="button" onclick="window.location.href='/index.html';">Return</button>
 
         <div>
             {{history}}
         </div>
 
         <form action="/clear" method="post">
-            <input class="button" type="submit" value="clear History">
+            <input class="button" type="submit" value="clear history">
         </form>
     </body>
 </html>
