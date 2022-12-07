@@ -29,7 +29,7 @@ object App {
     serverSocket.configureBlocking(false)
     serverSocket.register(selector, SelectionKey.OP_ACCEPT)
 
-    val buffer = ByteBuffer.allocate(4096)
+    val buffer = ByteBuffer.allocate(1000000)
 
     while (true) {
       selector.select()

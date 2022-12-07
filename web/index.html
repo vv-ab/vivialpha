@@ -26,7 +26,7 @@
                 padding: 5px 13px;
                 margin: 4px;
                 font-weight: bold;
-                rad
+                rad;
             }
             .button:hover {opacity: 1}
             #expressionInput {
@@ -41,7 +41,7 @@
                 padding: 5px 13px;
                 margin: 4px;
                 font-weight: bold;
-                rad
+                rad;
             }
             #button:hover {opacity: 1}
             #demo {
@@ -50,7 +50,11 @@
                 border: 2px solid;
                 margin: 2px;
             }
+
+
+
         </style>
+        <script src="d3.js"></script>
     </head>
     <body>
         <h1><u><span>vivialpha</span></u></h1>
@@ -60,10 +64,11 @@
                 <label for="expressionInput"><p>Expression:</p></label>
                 <input id="expressionInput" type="text" name="expression" placeholder="enter your expression here">
             </div>
-            <button id="button" type="button" onclick="showResult()">Show result</button>
+            <button id="button" type="button" onclick="showResult()" >Show result</button>
             <p id="demo" >result will show here</p>
         </div>
 
+        <svg></svg>
         <div>
             <button class="button" onclick="window.location.href='/history';">History</button>
         </div>
@@ -79,7 +84,79 @@
                     document.getElementById("demo").innerText = text.trim();
                 })
         }
+
     </script>
     <noscript>Sorry, your browser cannot show result.</noscript>
+
+    <script>
+        const root = d3.hierarchy({
+            name: "-",
+            children: [
+                {name: "+"},
+                {
+                    name: "/",
+                    children: [
+                        {name: "8"},
+                        {name: "22"},
+                    ]
+                }
+            ]
+        })
+
+        const dx = 50;
+        const dy = 50;
+
+        d3.tree().nodeSize([dx, dy])(root)
+
+        let x0 = Infinity;
+        let x1 = -x0;
+        root.each(d => {
+            if (d.x > x1) x1 = d.x;
+            if (d.x < x0) x0 = d.x;
+        });
+
+        const width = 500;
+        const height = 500;
+
+        const svg = d3.select("svg")
+            .attr("width", width)
+            .attr("height", height);
+
+        const group = svg.append("g")
+            .attr("transform", `translate(${dx - x0}, ${40})`);
+
+        group.append("g")
+            .selectAll("path")
+            .data(root.links())
+            .join("path")
+                .attr("d", d3.link(d3.curveBumpY)
+                    .x(d => d.x)
+                    .y(d => d.y))
+                .attr("fill", "none")
+                .attr("stroke", "black");
+
+
+        var node = group.append("g")
+            .selectAll("circle")
+            .data(root.descendants())
+            .join("a")
+            .attr("transform", function (node) {
+                return `translate(${node.x}, ${node.y})`;
+            })
+
+        node.append("circle")
+            .attr("r", 20)
+            .attr("fill", "white")
+            .attr("stroke", "#555555")
+
+        node.append("text")
+            .attr("text-anchor", "middle")
+            .attr("dominant-baseline", "middle")
+            .attr("paint-order", "stroke")
+            .attr("fill", "#555555")
+            .attr("font-size", 18)
+            .attr("stroke-width", 3)
+            .text(node => node.data.name);
+    </script>
     </body>
 </html>
