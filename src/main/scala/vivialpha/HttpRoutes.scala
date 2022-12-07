@@ -16,10 +16,12 @@ object HttpRoutes {
 
   def handleResult(httpRequest: HttpRequest): HttpResponse = {
 
-    val content = httpRequest.body.get.content // TODO: Handle empty body
+    val content = httpRequest.body.get.content
     val fileContent = content.split("=")
 
-    val historyFile = new File("data/history.txt")
+    val historyDir = new File("data")
+    historyDir.mkdirs()
+    val historyFile = new File(historyDir,"history.txt")
     historyFile.createNewFile()
     val source = Source.fromFile(historyFile)
 
