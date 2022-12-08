@@ -50,9 +50,6 @@
                 border: 2px solid;
                 margin: 2px;
             }
-
-
-
         </style>
         <script src="d3.js"></script>
     </head>
@@ -136,7 +133,7 @@
                 .attr("stroke", "black");
 
 
-        var node = group.append("g")
+        const node = group.append("g")
             .selectAll("circle")
             .data(root.descendants())
             .join("a")
