@@ -78,7 +78,10 @@ object HttpRoutes {
 
   def handleClear(httpRequest: HttpRequest): HttpResponse = {
 
-    Files.write(Paths.get("data/history.txt"), "".getBytes(StandardCharsets.UTF_8))
+    val historyFile = File("data/history.txt")
+    if (historyFile.exists() && historyFile.isFile) {
+      Files.write(historyFile.toPath, "".getBytes(StandardCharsets.UTF_8))
+    }
 
     val templateResult = loadTemplate("web/successful.html", Map(
       "successful action" -> "cleared history"
