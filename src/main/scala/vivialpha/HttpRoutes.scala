@@ -42,6 +42,9 @@ object HttpRoutes {
             case Left(failure) =>
               HttpResponse(HttpStatus(400, "Bad Request"), List.empty, Body(s"parsing failure: ${failure.message}"))
             case Right(tree) =>
+
+              val ast = json.Encoder.encode(tree)
+              
               val result = tree.compute()
 
               val newFileContent = s"$responseContent=$result\n" + source.mkString
