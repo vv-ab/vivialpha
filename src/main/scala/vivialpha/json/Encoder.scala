@@ -8,42 +8,36 @@ object Encoder {
 
   def encode(node: Node): String = {
 
+    def encodeOperator(operator: String, left: String, right: String): String = {
+
+      s"{\"name\":\"$operator\",\"children\":[$left,$right]}"
+    }
+
     node match {
       case OperandNode(operand) =>
-        s"{name:\"${operand.value}\"}"
-
+        s"{\"name\":\"${operand.value}\"}"
       case OperatorNode(operator, left, right) =>
         operator match {
           case Sin =>
-            val operator = "sin"
-            s"{name:\"$operator\",children:[{name:\"${left.compute()}\"},{name:\"${right.compute()}\"}]}"
+            encodeOperator("sin", s"${encode(left)}", s"${encode(right)}")
           case Cos =>
-            val operator = "cos"
-            s"{name:\"$operator\",children:[{name:\"${left.compute()}\"},{name:\"${right.compute()}\"}]}"
+            encodeOperator("cos", s"${encode(left)}", s"${encode(right)}")
           case Sqrt =>
-            val operator = "sqrt"
-            s"{name:\"$operator\",children:[{name:\"${left.compute()}\"},{name:\"${right.compute()}\"}]}"
+            encodeOperator("sqrt", s"${encode(left)}", s"${encode(right)}")
           case Fac =>
-            val operator = "!"
-            s"{name:\"$operator\",children:[{name:\"${left.compute()}\"},{name:\"${right.compute()}\"}]}"
+            encodeOperator("!", s"${encode(left)}", s"${encode(right)}")
           case Tan =>
-            val operator = "tan"
-            s"{name:\"$operator\",children:[{name:\"${left.compute()}\"},{name:\"${right.compute()}\"}]}"
+            encodeOperator("tan", s"${encode(left)}", s"${encode(right)}")
           case Pow =>
-            val operator = "^"
-            s"{name:\"$operator\",children:[{name:\"${left.compute()}\"},{name:\"${right.compute()}\"}]}"
+            encodeOperator("^", s"${encode(left)}", s"${encode(right)}")
           case Div =>
-            val operator = "/"
-            s"{name:\"$operator\",children:[{name:\"${left.compute()}\"},{name:\"${right.compute()}\"}]}"
+            encodeOperator("/", s"${encode(left)}", s"${encode(right)}")
           case Add =>
-            val operator = "+"
-            s"{name:\"$operator\",children:[{name:\"${left.compute()}\"},{name:\"${right.compute()}\"}]}"
+            encodeOperator("+", s"${encode(left)}", s"${encode(right)}")
           case Sub =>
-            val operator = "-"
-            s"{name:\"$operator\",children:[{name:\"${left.compute()}\"},{name:\"${right.compute()}\"}]}"
+            encodeOperator("-", s"${encode(left)}", s"${encode(right)}")
           case Mul =>
-            val operator = "*"
-            s"{name:\"$operator\",children:[{name:\"${left.compute()}\"},{name:\"${right.compute()}\"}]}"
+            encodeOperator("*", s"${encode(left)}", s"${encode(right)}")
         }
     }
 

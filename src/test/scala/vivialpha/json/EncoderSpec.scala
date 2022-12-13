@@ -1,6 +1,6 @@
 package vivialpha.json
 
-import compilersandbox.parser.{Add, Operand, OperandNode, OperatorNode}
+import compilersandbox.parser.{Add, Mul, Operand, OperandNode, OperatorNode}
 import compilersandbox.tokenizer.Tokenizer.Operator
 import org.junit.runner.RunWith
 import org.scalatest.freespec.AnyFreeSpec
@@ -18,10 +18,9 @@ class EncoderSpec extends AnyFreeSpec {
       val expected =
         """
           |{
-          | name: "5.0"
+          | "name": "5.0"
           |}
           |""".stripMargin.trim().replaceAll("\\s", "")
-      println(expected)
       val result = Encoder.encode(input)
       assert(result == expected)
     }
@@ -32,14 +31,36 @@ class EncoderSpec extends AnyFreeSpec {
       val expected =
         """
           |{
-          | name: "+",
-          |   children: [
-          |     {name: "5.0"},
-          |     {name: "1.0"}
+          | "name": "+",
+          |   "children": [
+          |     {"name": "5.0"},
+          |     {"name": "1.0"}
           |   ]
           |}
           |""".stripMargin.trim().replaceAll("\\s", "")
-      println(expected)
+      val result = Encoder.encode(input)
+      assert(result == expected)
+    }
+
+    "should encode an OperatorNode" in {
+
+      val input = OperatorNode(Add, OperatorNode(Mul, OperandNode(Operand(5)), OperandNode(Operand(3))), OperandNode(Operand(1)))
+      val expected =
+        """
+          |{
+          |   "name": "+",
+          |   "children": [
+          |     {
+          |       "name": "*",
+          |       "children": [
+          |         {"name": "5.0"},
+          |         {"name": "3.0"}
+          |       ]
+          |     },
+          |     {"name": "1.0"}
+          |   ]
+          |}
+          |""".stripMargin.trim().replaceAll("\\s", "")
       val result = Encoder.encode(input)
       assert(result == expected)
     }

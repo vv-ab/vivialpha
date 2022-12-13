@@ -44,14 +44,14 @@ object HttpRoutes {
             case Right(tree) =>
 
               val ast = json.Encoder.encode(tree)
-              
+
               val result = tree.compute()
 
               val newFileContent = s"$responseContent=$result\n" + source.mkString
               Files.write(Paths.get("data/history.txt"), newFileContent.getBytes(StandardCharsets.UTF_8))
               source.close()
 
-              HttpResponse(HttpStatus(200, "OK"), List.empty, Body(s"$responseContent=$result\n"))
+              HttpResponse(HttpStatus(200, "OK"), List.empty, Body(s"{\"result\":\"$result\",\"tree\":$ast}\n"))
           }
       }
     }

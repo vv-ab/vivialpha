@@ -76,56 +76,60 @@
                 method: 'POST',
                 body: `expression=${expression}`
                 })
-                .then((response) => response.text())
-                .then((text) => {
-                    document.getElementById("demo").innerText = text.trim();
-                })
+                .then((response) => {
+                    d3.select("svg")
+                        .selectAll("*")
+                        .remove();
+                    if (response.status === 200) {
+                        response.json().then((json) => {
+                            document.getElementById("demo").innerText = json.result;
+                            renderTree(json.tree)
+                        })
+                    }
+                    else {
+                        response.text().then((text) => {
+                            document.getElementById("demo").innerText = text.trim();
+                        })
+                    }
+                });
         }
 
-    </script>
-    <noscript>Sorry, your browser cannot show result.</noscript>
+        function renderTree(tree) {
+            const root = d3.hierarchy(tree);
 
-    <script>
-        const root = d3.hierarchy({
-            name: "-",
-            children: [
-                {name: "+"},
-                {
-                    name: "/",
-                    children: [
-                        {name: "8"},
-                        {name: "22"},
-                    ]
-                }
-            ]
-        })
+            const dx = 70;
+            const dy = 70;
 
-        const dx = 50;
-        const dy = 50;
+            d3.tree().nodeSize([dx, dy])(root);
 
-        d3.tree().nodeSize([dx, dy])(root)
+            let x0 = Infinity;
+            let x1 = -x0;
+            root.each(d => {
+                if (d.x > x1) x1 = d.x;
+                if (d.x < x0) x0 = d.x;
+            });
 
-        let x0 = Infinity;
-        let x1 = -x0;
-        root.each(d => {
-            if (d.x > x1) x1 = d.x;
-            if (d.x < x0) x0 = d.x;
-        });
+            let minY = Infinity;
+            let maxY = -minY;
+            root.each(d => {
+                if (d.y > maxY) maxY = d.y;
+                if (d.y < minY) minY = d.y;
+            });
 
-        const width = 500;
-        const height = 500;
+            const width = "100%";
+            const height = maxY - minY + 2 * dy;
 
-        const svg = d3.select("svg")
-            .attr("width", width)
-            .attr("height", height);
+            const svg = d3.select("svg")
+                .attr("width", width)
+                .attr("height", height);
 
-        const group = svg.append("g")
-            .attr("transform", `translate(${dx - x0}, ${40})`);
+            const group = svg.append("g")
+                .attr("transform", `translate(${dx - x0}, ${dy})`);
 
-        group.append("g")
-            .selectAll("path")
-            .data(root.links())
-            .join("path")
+            group.append("g")
+                .selectAll("path")
+                .data(root.links())
+                .join("path")
                 .attr("d", d3.link(d3.curveBumpY)
                     .x(d => d.x)
                     .y(d => d.y))
@@ -133,27 +137,41 @@
                 .attr("stroke", "black");
 
 
-        const node = group.append("g")
-            .selectAll("circle")
-            .data(root.descendants())
-            .join("a")
-            .attr("transform", function (node) {
-                return `translate(${node.x}, ${node.y})`;
-            })
+            const node = group.append("g")
+                .selectAll("circle")
+                .data(root.descendants())
+                .join("a")
+                .attr("transform", function (node) {
+                    return `translate(${node.x}, ${node.y})`;
+                });
 
-        node.append("circle")
-            .attr("r", 20)
-            .attr("fill", "white")
-            .attr("stroke", "#555555")
+            node.append("circle")
+                .attr("r", 30)
+                .attr("fill", "white")
+                .attr("stroke", "#555555");
 
-        node.append("text")
-            .attr("text-anchor", "middle")
-            .attr("dominant-baseline", "middle")
-            .attr("paint-order", "stroke")
-            .attr("fill", "#555555")
-            .attr("font-size", 18)
-            .attr("stroke-width", 3)
-            .text(node => node.data.name);
+            node.append("title")
+                .text(node => node.data.name);
+
+            node.append("text")
+                .attr("text-anchor", "middle")
+                .attr("dominant-baseline", "middle")
+                .attr("paint-order", "stroke")
+                .attr("fill", "#555555")
+                .attr("font-size", 15)
+                .attr("stroke-width", 4)
+                .text(node => {
+                    const threshold = 5;
+                    const text = node.data.name;
+                    if (text.length < threshold) {
+                        return text;
+                    }
+                    else {
+                        return text.substr(0, threshold).concat("...");
+                    }
+                });
+        }
     </script>
+    <noscript>Sorry, your browser cannot show result.</noscript>
     </body>
 </html>
