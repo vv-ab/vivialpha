@@ -1,10 +1,12 @@
 package vivialpha
 
+import compilersandbox.compute.Compute
+
 import java.nio.charset.StandardCharsets
 import java.io.{File, FileWriter}
 import java.nio.file.{Files, Paths}
 import scala.io.Source
-import vivialpha.model.Http._
+import vivialpha.model.Http.*
 import compilersandbox.tokenizer.{Preprocessor, Tokenizer}
 import compilersandbox.parser.{Node, Operand, Operator, Parser}
 import compilersandbox.makeErrorMessage
@@ -45,13 +47,23 @@ object HttpRoutes {
 
               val ast = json.Encoder.encode(tree)
 
-              val result = tree.compute()
+              Compute.compute(tree) match {
+                case Left(failure) =>
+                  HttpResponse(HttpStatus(400, "Bad Request"), List.empty, Body(s"computing error: ${failure.message}"))
+                case Right(value) =>
+                  val result = value match {
+                    case Left(value) =>
+                      s"$value"
+                    case Right(value) =>
+                      s"$value"
+                  }
+                  val newFileContent = s"$responseContent=$result\n" + source.mkString
+                  Files.write(Paths.get("data/history.txt"), newFileContent.getBytes(StandardCharsets.UTF_8))
+                  source.close()
 
-              val newFileContent = s"$responseContent=$result\n" + source.mkString
-              Files.write(Paths.get("data/history.txt"), newFileContent.getBytes(StandardCharsets.UTF_8))
-              source.close()
+                  HttpResponse(HttpStatus(200, "OK"), List.empty, Body(s"{\"result\":\"$result\",\"tree\":$ast}\n"))
+              }
 
-              HttpResponse(HttpStatus(200, "OK"), List.empty, Body(s"{\"result\":\"$result\",\"tree\":$ast}\n"))
           }
       }
     }

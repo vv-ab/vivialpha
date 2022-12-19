@@ -1,6 +1,6 @@
 package vivialpha.json
 
-import compilersandbox.parser.{Add, CloseParenthesis, Cos, Div, Fac, Mul, Node, OpenParenthesis, Operand, OperandNode, OperatorNode, Parser, Pow, Sin, Sqrt, Sub, Tan}
+import compilersandbox.parser.{Add, CloseParenthesis, Cos, DecimalOperand, Div, Fac, IntegerOperand, Mul, Node, OpenParenthesis, Operand, OperandNode, OperatorNode, Parser, Pow, Sin, Sqrt, Sub, Tan}
 import compilersandbox.tokenizer.Tokenizer
 import vivialpha.model.Http.{Body, HttpResponse}
 
@@ -15,7 +15,11 @@ object Encoder {
 
     node match {
       case OperandNode(operand) =>
-        s"{\"name\":\"${operand.value}\"}"
+        val value = operand match {
+          case IntegerOperand(value) => s"$value"
+          case DecimalOperand(value) => s"$value"
+        }
+        s"{\"name\":\"$value\"}"
       case OperatorNode(operator, left, right) =>
         operator match {
           case Sin =>

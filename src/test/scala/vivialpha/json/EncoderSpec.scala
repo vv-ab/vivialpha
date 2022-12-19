@@ -1,6 +1,6 @@
 package vivialpha.json
 
-import compilersandbox.parser.{Add, Mul, Operand, OperandNode, OperatorNode}
+import compilersandbox.parser.{Add, DecimalOperand, IntegerOperand, Mul, Operand, OperandNode, OperatorNode}
 import compilersandbox.tokenizer.Tokenizer.Operator
 import org.junit.runner.RunWith
 import org.scalatest.freespec.AnyFreeSpec
@@ -14,11 +14,11 @@ class EncoderSpec extends AnyFreeSpec {
 
     "should encode a simple OperandNode" in {
 
-      val input = OperandNode(Operand(5))
+      val input = OperandNode(IntegerOperand(5))
       val expected =
         """
           |{
-          | "name": "5.0"
+          | "name": "5"
           |}
           |""".stripMargin.trim().replaceAll("\\s", "")
       val result = Encoder.encode(input)
@@ -27,14 +27,14 @@ class EncoderSpec extends AnyFreeSpec {
 
     "should encode a simple OperatorNode" in {
 
-      val input = OperatorNode(Add, OperandNode(Operand(5)), OperandNode(Operand(1)))
+      val input = OperatorNode(Add, OperandNode(IntegerOperand(5)), OperandNode(IntegerOperand(1)))
       val expected =
         """
           |{
           | "name": "+",
           |   "children": [
-          |     {"name": "5.0"},
-          |     {"name": "1.0"}
+          |     {"name": "5"},
+          |     {"name": "1"}
           |   ]
           |}
           |""".stripMargin.trim().replaceAll("\\s", "")
@@ -44,7 +44,7 @@ class EncoderSpec extends AnyFreeSpec {
 
     "should encode an OperatorNode" in {
 
-      val input = OperatorNode(Add, OperatorNode(Mul, OperandNode(Operand(5)), OperandNode(Operand(3))), OperandNode(Operand(1)))
+      val input = OperatorNode(Add, OperatorNode(Mul, OperandNode(DecimalOperand(5.0)), OperandNode(IntegerOperand(3))), OperandNode(IntegerOperand(1)))
       val expected =
         """
           |{
@@ -54,14 +54,15 @@ class EncoderSpec extends AnyFreeSpec {
           |       "name": "*",
           |       "children": [
           |         {"name": "5.0"},
-          |         {"name": "3.0"}
+          |         {"name": "3"}
           |       ]
           |     },
-          |     {"name": "1.0"}
+          |     {"name": "1"}
           |   ]
           |}
           |""".stripMargin.trim().replaceAll("\\s", "")
       val result = Encoder.encode(input)
+      println(result)
       assert(result == expected)
     }
   }

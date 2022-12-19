@@ -13,7 +13,7 @@ apply plugin: "distribution"
 
 ext {
     additionalCompileOptions = [
-        "-no-ident",
+        "-no-indent",
         "-feature",
         "-Ycheck-all-patmat",
     ]
@@ -32,7 +32,7 @@ repositories {
 
 dependencies {
     implementation "org.scala-lang:scala3-library_3:3.2.0"
-    implementation "vv-ab:compilersandbox:0.1.7"
+    implementation "vv-ab:compilersandbox:0.2.0"
     testImplementation "org.scalatest:scalatest_3:3.2.14"
     testImplementation "org.scalatestplus:junit-4-13_3:3.2.12.0"
 }
