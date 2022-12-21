@@ -1,5 +1,6 @@
 package vivialpha
 
+import compilersandbox.analyser.Analyser
 import compilersandbox.compute.Compute
 
 import java.nio.charset.StandardCharsets
@@ -11,6 +12,7 @@ import compilersandbox.tokenizer.{Preprocessor, Tokenizer}
 import compilersandbox.parser.{Node, Operand, Operator, Parser}
 import compilersandbox.makeErrorMessage
 import vivialpha.Template.loadTemplate
+import compilersandbox.evaluate
 
 import scala.util.Left
 
@@ -33,38 +35,22 @@ object HttpRoutes {
     else {
       val responseContent = fileContent(1)
 
-      val tokens = Tokenizer.tokenize(responseContent)
-      tokens match {
-        case Left(failure) =>
-          HttpResponse(HttpStatus(400, "Bad Request"), List.empty, Body(s"tokenizer failure: ${failure.message}"))
-        case Right(tokens) =>
-          val preprocessedTokens = Preprocessor.preprocess(tokens, List.empty)
-          val tree = Parser.parse(preprocessedTokens)
-          tree match {
-            case Left(failure) =>
-              HttpResponse(HttpStatus(400, "Bad Request"), List.empty, Body(s"parsing failure: ${failure.message}"))
-            case Right(tree) =>
+      val result = Tokenizer.tokenize(responseContent)
+        .map(Preprocessor.preprocess)
+        .flatMap(Parser.parse)
+        .flatMap(Analyser.analyse)
+        .flatMap(tree => Compute.compute(tree).map((_, tree)))
 
-              val ast = json.Encoder.encode(tree)
-
-              Compute.compute(tree) match {
-                case Left(failure) =>
-                  HttpResponse(HttpStatus(400, "Bad Request"), List.empty, Body(s"computing error: ${failure.message}"))
-                case Right(value) =>
-                  val result = value match {
-                    case Left(value) =>
-                      s"$value"
-                    case Right(value) =>
-                      s"$value"
-                  }
-                  val newFileContent = s"$responseContent=$result\n" + source.mkString
-                  Files.write(Paths.get("data/history.txt"), newFileContent.getBytes(StandardCharsets.UTF_8))
-                  source.close()
-
-                  HttpResponse(HttpStatus(200, "OK"), List.empty, Body(s"{\"result\":\"$result\",\"tree\":$ast}\n"))
-              }
-
-          }
+      result match {
+        case Left(failures) =>
+          HttpResponse(HttpStatus(400, "Bad Request"), List.empty, Body(s"${failures.head.message}"))
+        case Right((value, tree)) =>
+          val result = value.fold(_.toString, _.toString)
+          val ast = json.Encoder.encode(tree)
+          val newFileContent = s"$responseContent=$result\n" + source.mkString
+          Files.write(Paths.get("data/history.txt"), newFileContent.getBytes(StandardCharsets.UTF_8))
+          source.close()
+          HttpResponse(HttpStatus(200, "OK"), List.empty, Body(s"{\"result\":\"$result\",\"tree\":$ast}\n"))
       }
     }
   }

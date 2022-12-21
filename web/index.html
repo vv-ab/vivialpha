@@ -167,7 +167,7 @@
                         return text;
                     }
                     else {
-                        return text.substr(0, threshold).concat("...");
+                        return text.substr(0, threshold - 1).concat("...");
                     }
                 });
         }
