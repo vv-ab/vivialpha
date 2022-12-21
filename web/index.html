@@ -50,11 +50,47 @@
                 border: 2px solid;
                 margin: 2px;
             }
+            .popup {
+                position: relative;
+                display: inline-block;
+                cursor: pointer;
+            }
+            .popup {
+                background-color: #8aaef3;
+
+                padding: 10px 4px;
+                margin: 2px
+            }
+            .popup .popuptext {
+                visibility: hidden;
+                width: 360px;
+                color: #000000;
+                text-align: center;
+                padding: 8px 0;
+                position: absolute;
+                z-index: 100;
+                bottom: -600%;
+                left: 100%;
+                margin-left: 80px;
+            }
+            .popup .show {
+                visibility: visible;
+                -webkit-animation: fadeIn 1s;
+                animation: fadeIn 1s
+            }
         </style>
         <script src="d3.js"></script>
     </head>
     <body>
         <h1><u><span>vivialpha</span></u></h1>
+
+        <div class="popup" onclick="showOperations()">possible operations
+            <span class="popuptext" id="operations">
+                <p>+, -, *, /, ^, sqrt, !, sin/cos/tan,</p>
+                <p>rounding with floor, ceil and round</p>
+                <p>using constants: e and pi</p>
+            </span>
+        </div>
 
         <div>
             <div>
@@ -69,6 +105,12 @@
         <div>
             <button class="button" onclick="window.location.href='/history';">History</button>
         </div>
+        <script>
+            function showOperations() {
+                var popup = document.getElementById("operations");
+                popup.classList.toggle("show");
+            }
+        </script>
     <script>
         function showResult() {
             let expression = document.getElementById("expressionInput").value;
