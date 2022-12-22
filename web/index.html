@@ -11,6 +11,9 @@
                 font-family: Arial;
                 border-radius: 5px;
             }
+            #all {
+                margin: 3px;
+            }
             a {
                 color: #0866C4;
             }
@@ -24,93 +27,73 @@
                 border: none;
                 opacity: 0.7;
                 padding: 5px 13px;
-                margin: 4px;
                 font-weight: bold;
-                rad;
             }
             .button:hover {opacity: 1}
             #expressionInput {
-                width: 200px;
-                height: 45px;
+                width: 300px;
+                height: 40px;
                 cursor: initial;
+                margin-top: 3px;
             }
             #button {
                 background-color: #427FEF;
                 border: none;
                 opacity: 0.7;
                 padding: 5px 13px;
-                margin: 4px;
+                margin-top: 4px;
                 font-weight: bold;
-                rad;
             }
             #button:hover {opacity: 1}
             #demo {
                 opacity: 50%;
                 padding: 10px 4px;
+                border: 2px solid #818181;
+                width: 300px;
+                height: 20px;
+                margin-top: 3px;
+                margin-bottom: 3px;
+            }
+            .infotext {
                 border: 2px solid;
-                margin: 2px;
-            }
-            .popup {
-                position: relative;
-                display: inline-block;
-                cursor: pointer;
-            }
-            .popup {
-                background-color: #8aaef3;
-
-                padding: 10px 4px;
-                margin: 2px
-            }
-            .popup .popuptext {
-                visibility: hidden;
-                width: 360px;
+                border-radius: 0;
+                width: 300px;
                 color: #000000;
-                text-align: center;
-                padding: 8px 0;
-                position: absolute;
-                z-index: 100;
-                bottom: -600%;
-                left: 100%;
-                margin-left: 80px;
+                text-align: start;
+                padding: 2px;
             }
-            .popup .show {
-                visibility: visible;
-                -webkit-animation: fadeIn 1s;
-                animation: fadeIn 1s
+            #text {
+                margin-bottom: 3px;
             }
+
         </style>
         <script src="d3.js"></script>
     </head>
     <body>
         <h1><u><span>vivialpha</span></u></h1>
 
-        <div class="popup" onclick="showOperations()">possible operations
-            <span class="popuptext" id="operations">
+        <div id="all">
+
+        <div class="infotext"><b>Possible operations:</b>
                 <p>+, -, *, /, ^, sqrt, !, sin/cos/tan,</p>
                 <p>rounding with floor, ceil and round</p>
                 <p>using constants: e and pi</p>
-            </span>
         </div>
 
         <div>
             <div>
-                <label for="expressionInput"><p>Expression:</p></label>
+                <label for="expressionInput"><p id="text">Expression:</p></label>
                 <input id="expressionInput" type="text" name="expression" placeholder="enter your expression here">
             </div>
             <button id="button" type="button" onclick="showResult()" >Show result</button>
-            <p id="demo" >result will show here</p>
+            <p id="demo">result will show here</p>
         </div>
 
         <svg></svg>
         <div>
             <button class="button" onclick="window.location.href='/history';">History</button>
         </div>
-        <script>
-            function showOperations() {
-                var popup = document.getElementById("operations");
-                popup.classList.toggle("show");
-            }
-        </script>
+        </div>
     <script>
         function showResult() {
             let expression = document.getElementById("expressionInput").value;
