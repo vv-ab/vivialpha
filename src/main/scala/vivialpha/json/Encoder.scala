@@ -1,6 +1,6 @@
 package vivialpha.json
 
-import compilersandbox.parser.{Add, CloseParenthesis, Cos, DecimalOperand, Div, Fac, IntegerOperand, Mul, Node, OpenParenthesis, Operand, OperandNode, OperatorNode, Parser, Pow, Sin, Sqrt, Sub, Tan}
+import compilersandbox.parser.{Add, Ceil, CloseParenthesis, Cos, DecimalOperand, Div, Fac, Flo, IntegerOperand, Mul, Node, OpenParenthesis, Operand, OperandNode, OperatorNode, Parser, Pow, Round, Sin, Sqrt, Sub, Tan}
 import compilersandbox.tokenizer.Tokenizer
 import vivialpha.model.Http.{Body, HttpResponse}
 
@@ -42,6 +42,14 @@ object Encoder {
             encodeOperator("-", s"${encode(left)}", s"${encode(right)}")
           case Mul =>
             encodeOperator("*", s"${encode(left)}", s"${encode(right)}")
+          case Round =>
+            encodeOperator("≈", s"${encode(left)}", s"${encode(right)}")
+          case Flo =>
+            encodeOperator("⌊x⌋", s"${encode(left)}", s"${encode(right)}")
+          case Ceil =>
+            encodeOperator("⌈x⌉", s"${encode(left)}", s"${encode(right)}")
+          case OpenParenthesis | CloseParenthesis =>
+            ???
         }
     }
 
